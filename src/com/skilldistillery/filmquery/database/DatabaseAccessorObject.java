@@ -81,10 +81,185 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
 
 		@Override
 		public Film findFilmById(int filmId) {
-			// TODO Auto-generated method stub
-			return null;
+			Film film = null;
+
+			try {
+				Connection connection = DriverManager.getConnection(URL, USER, PASS);
+				String sqlStaement = "SELECT * FROM film WHERE film.id = ?";
+				PreparedStatement preparedStatement = connection.prepareStatement(sqlStaement);
+				preparedStatement.setInt(1, filmId);
+				ResultSet resultSet = preparedStatement.executeQuery();
+
+				while (resultSet.next()) {
+					int id = resultSet.getInt("id");
+					String title = resultSet.getString("title");
+					String descritpion = resultSet.getString("description");
+					short releaseYear = resultSet.getShort("release_year");
+					int languageId = resultSet.getInt("language_id");
+					int rentDur = resultSet.getInt("rental_duration");
+					double rentalRate = resultSet.getDouble("rental_rate");
+					int length = resultSet.getInt("length");
+					double replacementCost = resultSet.getDouble("replacement_cost");
+					String rating = resultSet.getString("rating");
+					String specialFeatures = resultSet.getString("special_features");
+					film = new Film(id, title, descritpion, releaseYear, languageId, rentDur, rentalRate, length,
+							replacementCost, rating, specialFeatures);
+				}
+				resultSet.close();
+				preparedStatement.close();
+				connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+
+			return film;
+		}
+		public List<Actor> findActorsByFilmId(int filmId) {
+			List<Actor> cast = new ArrayList<>();
+			try {
+				Connection connection = DriverManager.getConnection(URL, USER, PASS);
+				String sqlStaement = "SELECT actor.* FROM actor JOIN film_actor ON film_actor.actor_id = actor.id WHERE film_actor.film_id = ?";
+				PreparedStatement preparedStatement = connection.prepareStatement(sqlStaement);
+				preparedStatement.setInt(1, filmId);
+				ResultSet resultSet = preparedStatement.executeQuery();
+				while (resultSet.next()) {
+					int id = resultSet.getInt("id");
+					String firstName = resultSet.getString("first_name");
+					String lastName = resultSet.getString("last_name");
+
+					Actor actor = new Actor(id, firstName, lastName);
+					cast.add(actor);
+				}
+				resultSet.close();
+				preparedStatement.close();
+				connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			return cast;
+
+		}
+		public List<Film> findFilmsByKeyword(String keyword) {
+			List<Film> films = new ArrayList<>();
+
+			try {
+				Connection connection = DriverManager.getConnection(URL, USER, PASS);
+				String sqlStaement = "SELECT film.* FROM film WHERE film.title LIKE ? or film.description LIKE ?";
+				PreparedStatement preparedStatement = connection.prepareStatement(sqlStaement);
+				preparedStatement.setString(1, "%" + keyword + "%");
+				preparedStatement.setString(2, "%" + keyword + "%");
+				ResultSet resultSet = preparedStatement.executeQuery();
+
+				while (resultSet.next()) {
+					int id = resultSet.getInt("id");
+					String title = resultSet.getString("title");
+					String descritpion = resultSet.getString("description");
+					short releaseYear = resultSet.getShort("release_year");
+					int languageId = resultSet.getInt("language_id");
+					int rentDur = resultSet.getInt("rental_duration");
+					double rentalRate = resultSet.getDouble("rental_rate");
+					int length = resultSet.getInt("length");
+					double replacementCost = resultSet.getDouble("replacement_cost");
+					String rating = resultSet.getString("rating");
+					String specialFeatures = resultSet.getString("special_features");
+					Film film = new Film(id, title, descritpion, releaseYear, languageId, rentDur, rentalRate, length,
+							replacementCost, rating, specialFeatures);
+					films.add(film);
+
+				}
+				resultSet.close();
+				preparedStatement.close();
+				connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+
+			return films;
+		}
+		@Override
+		public List<Film> findCopiesCondition(Film film) {
+			List<Film> films = new ArrayList<>();
+
+			try {
+				Connection connection = DriverManager.getConnection(URL, USER, PASS);
+				String sqlStaement = "SELECT film.*, inventory_item.*, language.name, actor.*, category.name FROM film JOIN film_actor on film_actor.film_id = film.id JOIN actor on film_actor.actor_id = actor.id JOIN inventory_item on film.id= inventory_item.film_id JOIN film_category on film.id = film_category.film_id JOIN category on film_category.category_id = category.id JOIN language ON film.language_id = language.id WHERE film.id = ?";
+				PreparedStatement preparedStatement = connection.prepareStatement(sqlStaement);
+				preparedStatement.setInt(1, film.getId());
+				ResultSet resultSet = preparedStatement.executeQuery();
+
+				while (resultSet.next()) {
+					int id = resultSet.getInt("id");
+					String title = resultSet.getString("title");
+					String descritpion = resultSet.getString("description");
+					short releaseYear = resultSet.getShort("release_year");
+					int languageId = resultSet.getInt("language_id");
+					int rentDur = resultSet.getInt("rental_duration");
+					String condition = resultSet.getString("media_condition");
+					double rentalRate = resultSet.getDouble("rental_rate");
+					int length = resultSet.getInt("length");
+					double replacementCost = resultSet.getDouble("replacement_cost");
+					String rating = resultSet.getString("rating");
+					String specialFeatures = resultSet.getString("special_features");
+					String language = resultSet.getString("language.name");
+					List<Actor> cast = findActorsByFilmId(id);
+					String category = resultSet.getString("category.name");
+					film = new Film(id, title, descritpion, releaseYear, languageId, rentDur, rentalRate, length,
+							replacementCost, rating, specialFeatures);
+					films.add(film);
+
+				}
+				resultSet.close();
+				preparedStatement.close();
+				connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+
+			return films;
 		}
 
+		public List<Film> getAllInfoOnAllCopiesFilms(String keyword) {
+			List<Film> films = new ArrayList<>();
+
+			try {
+				Connection connection = DriverManager.getConnection(URL, USER, PASS);
+				String sqlStaement = "SELECT film.*, inventory_item.*, language.name, actor.*, category.name FROM film JOIN film_actor on film_actor.film_id = film.id JOIN actor on film_actor.actor_id = actor.id JOIN inventory_item on film.id = inventory_item.film_id JOIN film_category on film.id = film_category.film_id JOIN category on film_category.category_id = category.id JOIN language ON film.language_id = language.id WHERE film.title LIKE ? OR film.description LIKE ?";
+				PreparedStatement preparedStatement = connection.prepareStatement(sqlStaement);
+				preparedStatement.setString(1, "%" + keyword + "%");
+				preparedStatement.setString(2, "%" + keyword + "%");
+				ResultSet resultSet = preparedStatement.executeQuery();
+
+				while (resultSet.next()) {
+					int id = resultSet.getInt("id");
+					String title = resultSet.getString("title");
+					String descritpion = resultSet.getString("description");
+					short releaseYear = resultSet.getShort("release_year");
+					int languageId = resultSet.getInt("language_id");
+					int rentDur = resultSet.getInt("rental_duration");
+					String condition = resultSet.getString("media_condition");
+					double rentalRate = resultSet.getDouble("rental_rate");
+					int length = resultSet.getInt("length");
+					double replacementCost = resultSet.getDouble("replacement_cost");
+					String rating = resultSet.getString("rating");
+					String specialFeatures = resultSet.getString("special_features");
+					String language = resultSet.getString("language.name");
+					List<Actor> cast = findActorsByFilmId(id);
+					String category = resultSet.getString("category.name");
+					Film film = new Film(id, title, descritpion, releaseYear, languageId, rentDur, rentalRate,
+							length, replacementCost, rating, specialFeatures);
+					films.add(film);
+
+				}
+				resultSet.close();
+				preparedStatement.close();
+				connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+
+			return films;
+
+		}
 
 
 }
