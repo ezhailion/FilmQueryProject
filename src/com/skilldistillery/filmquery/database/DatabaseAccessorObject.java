@@ -40,7 +40,7 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
 		    actor.setId(actorResult.getInt(1));
 		    actor.setFirstName(actorResult.getString(2));
 		    actor.setLastName(actorResult.getString(3));
-		    actor.setFilms(findFilmsByActorId(actorId)); // An Actor has Films
+		    
 		  }
 		  //...
 		  return actor;
@@ -66,6 +66,7 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
 		      double repCost = rs.getDouble(9);
 		      String rating = rs.getString(10);
 		      String features = rs.getString(11);
+		      
 		      Film film = new Film(filmId, title, desc, releaseYear, langId,
 		                           rentDur, rate, length, repCost, rating, features);
 		      films.add(film);
@@ -118,7 +119,7 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
 			List<Actor> cast = new ArrayList<>();
 			try {
 				Connection connection = DriverManager.getConnection(URL, USER, PASS);
-				String sqlStaement = "SELECT actor.* FROM actor JOIN film_actor ON film_actor.actor_id = actor.id WHERE film_actor.film_id = ?";
+				String sqlStaement = "SELECT actor.* FROM actor JOIN film_actor ON actor.id = film_actor.actor_id WHERE film_actor.film_id = ?";
 				PreparedStatement preparedStatement = connection.prepareStatement(sqlStaement);
 				preparedStatement.setInt(1, filmId);
 				ResultSet resultSet = preparedStatement.executeQuery();
@@ -175,6 +176,28 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
 			}
 
 			return films;
+		}
+		public String findLanguageByID(int langID) {
+			try {
+				String sql = "SELECT * from language where language.id = ? ";
+				Connection connection = DriverManager.getConnection(URL, USER, PASS);
+				PreparedStatement preparedStatement = connection.prepareStatement(sql);
+				preparedStatement.setString(1, "" + langID);
+				ResultSet resultSet = preparedStatement.executeQuery();
+				while (resultSet.next()) {
+					int id = resultSet.getInt("id");
+					String name = resultSet.getString("name");
+					return name;
+				}
+				resultSet.close();
+				preparedStatement.close();
+				connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+				return "";
+				
+			
 		}
 		@Override
 		public List<Film> findCopiesCondition(Film film) {

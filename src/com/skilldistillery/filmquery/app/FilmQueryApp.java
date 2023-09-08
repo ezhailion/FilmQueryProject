@@ -22,7 +22,7 @@ public class FilmQueryApp {
   private void test() throws SQLException {
     Film film = db.findFilmById(1);
     Actor actor = db.findActorById(1);
-    System.out.println(actor);
+//    System.out.println(actor);
   }
 
   private void launch() {
@@ -40,10 +40,11 @@ public class FilmQueryApp {
     	switch(input) {
     	case 1: 
     		System.out.println("Enter your film id.");
-    		Film filmResult = findFilmById(input);
+    		int requestedID = sc.nextInt();
+    		sc.nextLine();
+    		Film filmResult = findFilmById(requestedID);
     		if(filmResult != null) {
-    			List<Film> searchResults = idSearchCopies(filmResult);
-    			displayFilmsDetails(searchResults);
+    			displayFilmDetails(filmResult);
     		}
     		else {
     			System.out.println("Sorry. There were no results.");
@@ -54,7 +55,7 @@ public class FilmQueryApp {
     		String searchKeyword = sc.nextLine();
     		List<Film> searchResults = findFilmBySearch(searchKeyword);
     		if(!searchResults.isEmpty()) {
-    			displayFilmsDetails(searchResults);
+    			printFilms(searchResults);
     		}
     		else {
     			System.out.println("Sorry. There were no results.");
@@ -70,9 +71,9 @@ public class FilmQueryApp {
   }
   private void displayMenu() {
 	  System.out.println(" Please make a choice to find the film you want.");
-	  System.out.println(" Choose ID to sort by the film id.");
+	  System.out.println(" Choose 1 for ID to sort by the film id.");
 	  System.out.println(" --------------------------------------");
-	  System.out.println(" Choose to find by a keyword.");
+	  System.out.println(" Choose 2 to find your film by a keyword.");
 	  System.out.println(" --------------------------------------");
 	  System.out.println(" Type 'Exit' to exit the menu.");
   }
@@ -85,14 +86,31 @@ public class FilmQueryApp {
 		}
 		return film;
 	}
-  private void displayFilmsDetails(List<Film> films) {
-		for (Film film : films) {
+  private void printActors(List<Actor> actors) {
+	System.out.print("Cast: ");
+	  for (Actor actor : actors) {
+		  System.out.println(actor);
+			System.out.println();
+		}
+	  
+  }
+  private void printFilms(List<Film> films) {
+	  for (Film film : films) {
+		displayFilmDetails(film);
+	}
+  }
+  private void displayFilmDetails(Film film) {
 			System.out.println("Title : " + film.getTitle());
 			System.out.println("Year : " + film.getReleaseYear());
 			System.out.println("Rating : " + film.getRating());
 			System.out.println("Description : " + film.getDescription());
-			System.out.println(" ");
-		}
+			System.out.println("Language : " + db.findLanguageByID(film.getLangId()));
+			List<Actor> actors = db.findActorsByFilmId(film.getId());
+			film.setActors(actors);
+//			System.out.println("Cast : " + film.getActors());
+//			System.out.println(" ");
+			printActors(actors);
+		
 	}
   private List<Film> idSearchCopies(Film film) {
 		List<Film> films = db.findCopiesCondition(film);

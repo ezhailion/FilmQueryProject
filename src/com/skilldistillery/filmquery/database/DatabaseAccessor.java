@@ -13,4 +13,5 @@ public interface DatabaseAccessor {
   public List<Film> getAllInfoOnAllCopiesFilms(String keyword);
   public List<Film> findCopiesCondition(Film film);
   List<Film> findFilmsByKeyword(String keyword);
+public String findLanguageByID(int langId);
 }
