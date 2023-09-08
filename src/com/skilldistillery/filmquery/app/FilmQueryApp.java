@@ -107,8 +107,6 @@ public class FilmQueryApp {
 			System.out.println("Language : " + db.findLanguageByID(film.getLangId()));
 			List<Actor> actors = db.findActorsByFilmId(film.getId());
 			film.setActors(actors);
-//			System.out.println("Cast : " + film.getActors());
-//			System.out.println(" ");
 			printActors(actors);
 		
 	}
